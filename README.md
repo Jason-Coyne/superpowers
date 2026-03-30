@@ -1,194 +1,116 @@
-# Superpowers Extended for Claude Code
+# Superpowers — Tyler Technologies Reviewed Fork
 
-A community-maintained fork of [obra/superpowers](https://github.com/obra/superpowers) specifically for Claude Code users.
+This is Tyler Technologies' reviewed fork of [pcvelz/superpowers](https://github.com/pcvelz/superpowers) (itself a fork of [obra/superpowers](https://github.com/obra/superpowers)). It exists to reduce risk when using the Superpowers plugin across Tyler projects and environments.
 
-## Why This Fork Exists
+---
 
-The original Superpowers is designed as a cross-platform toolkit that works across multiple AI CLI tools (Claude Code, Codex, OpenCode, Gemini CLI). Features unique to Claude Code fall outside the scope of the upstream project due to its [cross-platform nature](https://github.com/obra/superpowers/pull/344#issuecomment-3795515617).
+## What Is Superpowers?
 
-This fork integrates Claude Code-native features into the Superpowers workflow.
+[Superpowers](https://github.com/obra/superpowers) is an open-source skills library for AI coding agents, created by Jesse Vincent. It provides a structured development workflow that activates automatically when an agent starts working:
 
-### What We Do Differently
+1. **Brainstorming** — Before writing code, the agent asks what you're building, refines the design through questions, and presents it in sections for approval.
+2. **Planning** — Breaks approved designs into bite-sized implementation tasks with exact file paths, code snippets, and verification steps.
+3. **Execution** — Dispatches subagents per task with two-stage code review (spec compliance, then code quality), or executes in batches with human checkpoints.
+4. **Testing** — Enforces test-driven development (RED-GREEN-REFACTOR) during implementation.
+5. **Completion** — Verifies all tests pass, presents merge/PR options, and cleans up.
 
-- Leverage Claude Code-native features as they're released
-- Community-driven - contributions welcome for any CC-specific enhancement
-- Track upstream - stay compatible with obra/superpowers core workflow
+The skills trigger automatically — the agent checks for applicable skills before every action. This enforces disciplined workflows rather than ad-hoc coding.
 
-### Current Enhancements
+Superpowers is cross-platform, designed to work across Claude Code, Codex, OpenCode, and Gemini CLI.
 
-| Feature | Claude Code Version | Description |
-|---------|---------------------|-------------|
-| Native Task Management | v2.1.16+ | Dependency tracking, real-time progress visibility |
-| Structured Task Metadata | v2.1.16+ | Goal/Files/AC/Verify structure with embedded `json:metadata` |
-| Pre-commit Task Gate | v2.1.16+ | Plugin hook blocks `git commit` when tasks are incomplete |
+## What Is the Claude Code Fork (pcvelz)?
 
-## Visual Comparison
+The [pcvelz/superpowers](https://github.com/pcvelz/superpowers) fork adds features specific to Claude Code that fall outside the upstream project's cross-platform scope. Key enhancements:
 
-<table>
-<tr>
-<th>Superpowers (Vanilla)</th>
-<th>Superpowers Extended CC</th>
-</tr>
-<tr>
-<td valign="top">
+- **Native Task Management** — Replaces markdown-based TodoWrite with Claude Code's native `TaskCreate`/`TaskUpdate` tools, providing real-time progress visibility in the UI, dependency tracking (`blockedBy`), and cross-session persistence via `.tasks.json` files.
+- **User Verification Gates** — A 4-layer enforcement system (plan, task metadata, execution logic, hook) ensuring that when a prompt requires human sign-off, that requirement survives through planning and execution. Tasks with `requiresUserVerification: true` cannot be marked complete without calling `AskUserQuestion`.
+- **Pre-Commit Task Gate** — A hook that blocks `git commit` when native tasks are still incomplete.
+- **Structured Task Metadata** — Every task carries machine-readable fields (files, verifyCommand, acceptanceCriteria) embedded as `json:metadata` in the task description.
+- **EnterPlanMode Prohibition** — Prevents Claude Code's built-in plan mode from interfering with skill workflows.
 
-![Vanilla](docs/screenshots/vanilla-session.png)
+For full details, see [docs/feature-analysis-vs-upstream.md](docs/feature-analysis-vs-upstream.md).
 
-- Tasks exist only in markdown plan
-- No runtime task visibility
-- Agent may jump ahead or skip tasks
-- Progress tracked manually by reading output
+## What Is This Fork (Tyler)?
 
-</td>
-<td valign="top">
+This fork is a **reviewed, pinned snapshot** of pcvelz/superpowers intended for use in Tyler Technologies projects and environments. Its purpose is to ensure no malicious or unwanted code is introduced into our development workflows through the Superpowers plugin.
 
-![Extended CC](docs/screenshots/extended-cc-session.png)
+### Why This Fork Exists
 
-- **Dependency enforcement** - Task 2 blocked until Task 1 completes (no front-running)
-- **Execution on rails** - Native task manager keeps agent following the plan
-- **Real-time visibility** - User sees actual progress with pending/in_progress/completed states
-- **Session-aware** - TaskList shows what's done, what's blocked, what's next
+Superpowers is a third-party plugin that injects instructions into every AI coding session. It includes:
+- Session-start hooks that inject skill content into agent context
+- PreToolUse hooks that intercept Bash and TaskUpdate calls
+- Shell scripts that parse session transcripts
+- Persuasion techniques documented for maximizing AI compliance with workflows
 
-</td>
-</tr>
-</table>
+While our [security audit](docs/security-audit.md) found no malicious behavior, the nature of this plugin — running hooks on every tool call, injecting instructions at session start, and shaping agent behavior through assertive prompting — means we should not blindly track an upstream we do not control.
+
+### What This Fork Provides
+
+- **Security audit on record** — A full audit covering data exfiltration, prompt injection, hidden code, and supply chain risks. See [docs/security-audit.md](docs/security-audit.md).
+- **Feature analysis on record** — A detailed comparison of every behavioral difference from upstream. See [docs/feature-analysis-vs-upstream.md](docs/feature-analysis-vs-upstream.md).
+- **Controlled updates** — Upstream changes from pcvelz (and transitively obra) are merged only after review. No automatic tracking.
+- **No surprise code** — The commit history in this fork is limited to the reviewed baseline plus any Tyler-specific adjustments.
+
+### Update Policy
+
+Updates from pcvelz/superpowers are pulled manually and reviewed before merging. The review should cover:
+
+1. New or modified hook scripts (anything in `hooks/`)
+2. Changes to session-start injection (`hooks/session-start`)
+3. New shell/Python code execution patterns
+4. Changes to plugin metadata (`.claude-plugin/`, `.cursor-plugin/`)
+5. New external URLs or network calls
+6. Changes to skill behavior that could affect agent autonomy
+
+### How to Update from Upstream
+
+```bash
+# Fetch latest from both upstreams
+git fetch obra
+git fetch pcvelz
+
+# Review what changed
+git log --oneline pcvelz/main..HEAD   # local-only commits
+git log --oneline HEAD..pcvelz/main   # upstream-only commits
+git diff HEAD..pcvelz/main --stat     # file-level summary
+
+# After review, merge
+git merge pcvelz/main
+```
 
 ## Installation
 
-### Option 1: Via Marketplace (recommended)
+### Step 1: Register the marketplace
 
 ```bash
-# Register marketplace
-/plugin marketplace add pcvelz/superpowers
-
-# Install plugin
-/plugin install superpowers-extended-cc@superpowers-extended-cc-marketplace
+/plugin marketplace add Jason-Coyne/superpowers
 ```
 
-### Option 2: Direct URL
+### Step 2: Install the plugin
 
 ```bash
-/plugin install --source url https://github.com/pcvelz/superpowers.git
+/plugin install superpowers-extended-cc@tyler-superpowers
 ```
 
 ### Verify Installation
-
-Check that commands appear:
 
 ```bash
 /help
 ```
 
-```
-# Should see:
-# /superpowers-extended-cc:brainstorming - Interactive design refinement
-# /superpowers-extended-cc:writing-plans - Create implementation plan
-# /superpowers-extended-cc:executing-plans - Execute plan in batches
-```
+You should see skills prefixed with `superpowers-extended-cc:` (brainstorming, writing-plans, executing-plans, etc.).
 
-## The Basic Workflow
+### Updating
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
-
-2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
-
-3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps. *Creates native tasks with dependencies.*
-
-4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
-
-5. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
-
-6. **requesting-code-review** - Activates between tasks. Reviews against plan, reports issues by severity. Critical issues block progress.
-
-7. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
-
-**The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
-
-## How Native Tasks Work
-
-When `writing-plans` creates tasks, each task carries structured metadata that survives across sessions and subagent dispatch:
-
-```yaml
-TaskCreate:
-  subject: "Task 1: Add price validation to optimizer"
-  description: |
-    **Goal:** Validate input prices before optimization runs.
-
-    **Files:**
-    - Modify: `src/optimizer.py:45-60`
-    - Create: `tests/test_price_validation.py`
-
-    **Acceptance Criteria:**
-    - [ ] Negative prices raise ValueError
-    - [ ] Empty price list raises ValueError
-    - [ ] Valid prices pass through unchanged
-
-    **Verify:** `pytest tests/test_price_validation.py -v`
-
-    ```json:metadata
-    {"files": ["src/optimizer.py", "tests/test_price_validation.py"],
-     "verifyCommand": "pytest tests/test_price_validation.py -v",
-     "acceptanceCriteria": ["Negative prices raise ValueError",
-       "Empty price list raises ValueError",
-       "Valid prices pass through unchanged"]}
-    ```
+```bash
+/plugin update superpowers-extended-cc@tyler-superpowers
 ```
 
-The `json:metadata` block is embedded in the description because `TaskGet` returns the description but not the `metadata` parameter. This ensures metadata is always available — for `executing-plans` verification, `subagent-driven-development` dispatch, and `.tasks.json` cross-session resume.
+Note: Updates only pull from this reviewed fork, not directly from upstream.
 
-## What's Inside
+### Recommended Configuration
 
-### Skills Library
-
-**Testing**
-- **test-driven-development** - RED-GREEN-REFACTOR cycle (includes testing anti-patterns reference)
-
-**Debugging**
-- **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
-- **verification-before-completion** - Ensure it's actually fixed
-
-**Collaboration**
-- **brainstorming** - Socratic design refinement + *native task creation*
-- **writing-plans** - Detailed implementation plans + *native task dependencies*
-- **executing-plans** - Batch execution with checkpoints
-- **dispatching-parallel-agents** - Concurrent subagent workflows
-- **requesting-code-review** - Pre-review checklist
-- **receiving-code-review** - Responding to feedback
-- **using-git-worktrees** - Parallel development branches
-- **finishing-a-development-branch** - Merge/PR decision workflow
-- **subagent-driven-development** - Fast iteration with two-stage review (spec compliance, then code quality)
-
-**Meta**
-- **writing-skills** - Create new skills following best practices (includes testing methodology)
-- **using-superpowers** - Introduction to the skills system
-
-## Philosophy
-
-- **Test-Driven Development** - Write tests first, always
-- **Systematic over ad-hoc** - Process over guessing
-- **Complexity reduction** - Simplicity as primary goal
-- **Evidence over claims** - Verify before declaring success
-
-Read more: [Superpowers for Claude Code](https://blog.fsck.com/2025/10/09/superpowers/)
-
-## Contributing
-
-Contributions for Claude Code-specific enhancements are welcome!
-
-1. Fork this repository
-2. Create a branch for your enhancement
-3. Follow the `writing-skills` skill for creating and testing new skills
-4. Submit a PR
-
-See `skills/writing-skills/SKILL.md` for the complete guide.
-
-## Recommended Configuration
-
-### Disable Auto Plan Mode
-
-Claude Code may automatically enter Plan mode during planning tasks, which conflicts with the structured skill workflows in this plugin. To prevent this, add `EnterPlanMode` to your permission deny list.
-
-**In your project's `.claude/settings.json`:**
+**Disable Auto Plan Mode** — Claude Code may automatically enter Plan mode, which conflicts with the skill workflows. Add `EnterPlanMode` to your deny list in your project's `.claude/settings.json`:
 
 ```json
 {
@@ -198,13 +120,7 @@ Claude Code may automatically enter Plan mode during planning tasks, which confl
 }
 ```
 
-This blocks the model from calling `EnterPlanMode`, ensuring the brainstorming and writing-plans skills operate correctly in normal mode. See [upstream discussion](https://github.com/anthropics/claude-code/issues/23384) for context.
-
-### Block Commits With Incomplete Tasks
-
-When using native tasks, the agent should not commit until all tasks are finished. This plugin includes an example hook that blocks `git commit` when tasks are still open.
-
-Add this to your `.claude/settings.local.json`:
+**Block Commits With Incomplete Tasks** — The plugin includes a hook that blocks `git commit` when native tasks are still open. Add this to your `.claude/settings.local.json`:
 
 ```json
 {
@@ -215,7 +131,7 @@ Add this to your `.claude/settings.local.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/.claude/plugins/marketplaces/superpowers-extended-cc-marketplace/hooks/examples/pre-commit-check-tasks.sh"
+            "command": "bash ~/.claude/plugins/marketplaces/tyler-superpowers/hooks/examples/pre-commit-check-tasks.sh"
           }
         ]
       }
@@ -224,25 +140,24 @@ Add this to your `.claude/settings.local.json`:
 }
 ```
 
-The hook ships with the plugin at `hooks/examples/pre-commit-check-tasks.sh`. The marketplace path is stable across versions. It parses the session transcript for `TaskCreate`/`TaskUpdate` calls and blocks `git commit` when any tasks are not completed, cancelled, or deleted. Non-commit Bash commands pass through unaffected.
+> **Note:** The marketplace directory name may vary. After installation, run `ls ~/.claude/plugins/marketplaces/` to confirm the exact path and adjust the hook command if needed.
 
-## Updating
+## Documentation
 
-Skills update automatically when you update the plugin:
+| Document | Description |
+|----------|-------------|
+| [docs/security-audit.md](docs/security-audit.md) | Full security audit of the pcvelz fork |
+| [docs/feature-analysis-vs-upstream.md](docs/feature-analysis-vs-upstream.md) | Detailed comparison of all behavioral differences from obra upstream |
+| [skills/shared/task-format-reference.md](skills/shared/task-format-reference.md) | Native task metadata schema |
 
-```bash
-/plugin update superpowers-extended-cc@superpowers-extended-cc-marketplace
-```
+## Remotes
 
-## Upstream Compatibility
-
-This fork tracks `obra/superpowers` main branch. Changes specific to Claude Code are additive - the core workflow remains compatible.
+| Remote | Repository | Purpose |
+|--------|-----------|---------|
+| `origin` | Jason-Coyne/superpowers | This fork (Tyler reviewed) |
+| `pcvelz` | pcvelz/superpowers | Claude Code fork (upstream) |
+| `obra` | obra/superpowers | Original project (root upstream) |
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Support
-
-- **Issues**: https://github.com/pcvelz/superpowers/issues
-- **Upstream**: https://github.com/obra/superpowers
+MIT License — see LICENSE file for details.

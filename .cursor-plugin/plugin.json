@@ -4,18 +4,23 @@
   "description": "Claude Code-specific fork of Superpowers with native task management and CC-specific enhancements",
   "version": "5.2.3",
   "author": {
-    "name": "Jesse Vincent",
-    "email": "jesse@fsck.com"
+    "name": "Jason-Coyne",
+    "email": "jason.coyne@tylertech.com"
   },
   "contributors": [
     {
       "name": "pcvelz",
       "url": "https://github.com/pcvelz",
-      "role": "Fork maintainer"
+      "role": "Claude Code fork maintainer"
+    },
+    {
+      "name": "Jesse Vincent",
+      "url": "https://github.com/obra",
+      "role": "Original author"
     }
   ],
-  "homepage": "https://github.com/pcvelz/superpowers",
-  "repository": "https://github.com/pcvelz/superpowers",
+  "homepage": "https://github.com/Jason-Coyne/superpowers",
+  "repository": "https://github.com/Jason-Coyne/superpowers",
   "license": "MIT",
   "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows", "claude-code", "native-tasks"],
   "skills": "./skills/",

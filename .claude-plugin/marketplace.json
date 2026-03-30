@@ -1,19 +1,19 @@
 {
-  "name": "superpowers-extended-cc-marketplace",
-  "description": "Marketplace for Superpowers Extended CC - Claude Code-specific enhancements",
+  "name": "tyler-superpowers",
+  "description": "Tyler Technologies reviewed fork of Superpowers Extended CC",
   "owner": {
-    "name": "pcvelz",
-    "email": "pcvelz@users.noreply.github.com"
+    "name": "Jason-Coyne",
+    "email": "jason.coyne@tylertech.com"
   },
   "plugins": [
     {
       "name": "superpowers-extended-cc",
-      "description": "Claude Code-specific fork of Superpowers with native task management and CC-specific enhancements",
+      "description": "Security-reviewed Superpowers with native task management and CC-specific enhancements",
       "version": "5.2.3",
       "source": "./",
       "author": {
-        "name": "pcvelz",
-        "email": "pcvelz@users.noreply.github.com"
+        "name": "Jason-Coyne",
+        "email": "jason.coyne@tylertech.com"
       }
     }
   ]
