@@ -1,7 +1,7 @@
 {
   "name": "superpowers-extended-cc",
   "description": "Claude Code-specific fork of Superpowers with native task management and CC-specific enhancements",
-  "version": "5.2.8",
+  "version": "5.5.0",
   "author": {
     "name": "Jason-Coyne",
     "email": "jason.coyne@tylertech.com"
@@ -9,5 +9,14 @@
   "homepage": "https://github.com/Jason-Coyne/superpowers",
   "repository": "https://github.com/Jason-Coyne/superpowers",
   "license": "MIT",
-  "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows", "claude-code", "native-tasks"]
+  "keywords": [
+    "skills",
+    "tdd",
+    "debugging",
+    "collaboration",
+    "best-practices",
+    "workflows",
+    "claude-code",
+    "native-tasks"
+  ]
 }
